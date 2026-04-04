@@ -442,7 +442,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					playerSeek(m.player, 60)
 				case "down":
 					playerSeek(m.player, -60)
-				case "enter":
+				case "enter", "medianext":
 					// Skip forwards a track.
 					// Keep index in bounds.
 					if ((m.queue.Index + 1) < len(m.queue.PlayOrder)) {
@@ -461,7 +461,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							m.image = renderTrackImage(m.trackMetadata.Artwork)
 						}
 					}
-				case "backspace":
+				case "backspace", "mediaprev":
 					// Skip backwards a track.
 					// Keep index in bounds.
 					if ((m.queue.Index - 1) > -1) {
