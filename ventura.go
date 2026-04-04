@@ -431,7 +431,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						os.Exit(1)
 					}
 					return m, tea.Quit
-				case "space":
+				case "space", "mediaplay", "mediapause":
 					m.playing = !m.playing
 					toggleTrackPause(m.player)
 				case "right":
