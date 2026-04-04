@@ -730,7 +730,7 @@ func main() {
 	// Create our bubbletea program.
 	p := tea.NewProgram(initialModel(*shuffle, *loopTrack, *loopPlaylist, *trackMetaData, player, mpvEvents, q, initialArtwork))
 
-	// Make sure out bubbletea program launches without an error.
+	// Make sure our bubbletea program launches without an error.
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
