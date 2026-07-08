@@ -47,6 +47,8 @@ type TrackMetadata struct {
 
 // Extract metadata from an audio track.
 func getTrackMetaData(path string) *TrackMetadata {
+	meta := &TrackMetadata{Title: path,}
+
 	// Open the file
 	f, err := os.Open(path)
 	if err != nil {
@@ -59,27 +61,31 @@ func getTrackMetaData(path string) *TrackMetadata {
 	if err != nil {
 		// File has no metadata error.
 		if errors.Is(err, tag.ErrNoTagsFound) {
-			return &TrackMetadata{}
+			return meta
 		}
 
 		// All other errors.
 		log.Fatal(err)
 	}
 
-	return &TrackMetadata{
-		Title: m.Title(),
-		Album: m.Album(),
-		Artist: m.Artist(),
-		AlbumArtist: m.AlbumArtist(),
-		Composer: m.Composer(),
-		Genre: m.Genre(),
-		Year: m.Year(),
-		//Track: m.Track(),
-		//Disc: m.Disc(),
-		Artwork: m.Picture(),
-		Lyrics: m.Lyrics(),
-		Comment: m.Comment(),
+	// If there is no title, set the title to be the file name.
+	if m.Title() != "" {
+		meta.Title = m.Title()
 	}
+
+	meta.Album = m.Album()
+	meta.Artist = m.Artist()
+	meta.AlbumArtist = m.AlbumArtist()
+	meta.Composer = m.Composer()
+	meta.Genre = m.Genre()
+	meta.Year = m.Year()
+	//meta.Track = m.Track()
+	//meta.Disc = m.Disc()
+	meta.Artwork = m.Picture()
+	meta.Lyrics = m.Lyrics()
+	meta.Comment = m.Comment()
+
+	return meta
 }
 
 // Custom type used for track queue.
