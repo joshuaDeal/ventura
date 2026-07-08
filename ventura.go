@@ -6,6 +6,7 @@ import (
 	"strings"
 	"flag"
 	"log"
+	"errors"
 	"strconv"
 	"time"
 	"bytes"
@@ -56,6 +57,12 @@ func getTrackMetaData(path string) *TrackMetadata {
 	// Read track metadata
 	m, err := tag.ReadFrom(f)
 	if err != nil {
+		// File has no metadata error.
+		if errors.Is(err, tag.ErrNoTagsFound) {
+			return &TrackMetadata{}
+		}
+
+		// All other errors.
 		log.Fatal(err)
 	}
 
