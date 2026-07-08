@@ -133,6 +133,11 @@ func isAudioFile(path string) bool {
 		return true
 	}
 
+	// M4A / MP4
+	if len(header) >= 8 && bytes.Equal(header[4:8], []byte("ftyp")) {
+			return true
+	}
+
 	return false
 }
 
