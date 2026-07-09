@@ -400,6 +400,7 @@ type playerModel struct {
 	mpvEvents     chan mpv.Event
 	queue         *Queue
 	manualSkip    bool
+	showHelp      bool
 }
  
 // Initialize the player model.
@@ -571,6 +572,8 @@ func (m playerModel) update(msg tea.Msg) (playerModel, tea.Cmd) {
 			m.loopTrack = !m.loopTrack
 		case "L":
 			m.loopPlaylist = !m.loopPlaylist
+		case "c":
+			m.showHelp = !m.showHelp
 		}
 	}
  
@@ -662,7 +665,26 @@ func renderPlayerScreen(m playerModel) string {
 	middleColumn := lipgloss.JoinVertical(lipgloss.Left, trackPanel, controlPanel)
  
 	// Then, the final layout. Image to the left, next to the middle column.
-	return lipgloss.JoinHorizontal(lipgloss.Top, imagePanel, middleColumn)
+	body := lipgloss.JoinHorizontal(lipgloss.Top, imagePanel, middleColumn)
+ 
+	if !m.showHelp {
+		return body
+	}
+ 
+	// Key hint bar.
+	linebreakStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("5"))
+	hints := linebreakStyle.Render("[space]") + " Play/Pause  " +
+		linebreakStyle.Render("[←/→]") + " Seek 5s  " +
+		linebreakStyle.Render("[↑/↓]") + " Seek 60s  " +
+		linebreakStyle.Render("[enter]") + " Next  " +
+		linebreakStyle.Render("[bksp]") + " Prev  " +
+		linebreakStyle.Render("[-/=]") + " Volume  " +
+		linebreakStyle.Render("[m]") + " Mute  " +
+		linebreakStyle.Render("[s]") + " Shuffle  " +
+		linebreakStyle.Render("[l/L]") + " Loop  " +
+		linebreakStyle.Render("[tab]") + " Queue"
+ 
+	return lipgloss.JoinVertical(lipgloss.Left, body, hints)
 }
  
 // ---------------------------------------------------------------------------
@@ -688,6 +710,7 @@ type queueModel struct {
 	searchQuery  string // active/last query (persists after esc like vim)
 	matches      []int  // PlayOrder indices whose display name matches searchQuery
 	matchCursor  int    // index into matches for n/N navigation
+	showHelp     bool   // true = show key hint bar
 }
  
 // Initialize the queue model.
@@ -870,6 +893,8 @@ func (m queueModel) update(msg tea.Msg) (queueModel, tea.Cmd) {
 				m.matchCursor = (m.matchCursor - 1 + len(m.matches)) % len(m.matches)
 				m.cursor = m.matches[m.matchCursor]
 			}
+		case "c":
+			m.showHelp = !m.showHelp
 		case "ctrl+c", "q":
 			// In order to exit, we first must stop and unload the current track.
 			err := m.player.Command([]string{"stop"})
@@ -1099,20 +1124,22 @@ func renderQueueScreen(m queueModel) string {
 	}
  
 	// Key hint bar.
-	hints := linebreakStyle.Render("[j/k]") + " Navigate  " +
-		linebreakStyle.Render("[home/end]") + " Top/Bottom  " +
-		linebreakStyle.Render("[pgup/pgdn]") + " Page  " +
-		linebreakStyle.Render("[g]") + " Current track  " +
-		linebreakStyle.Render("[enter]") + " Select/Drop  " +
-		linebreakStyle.Render("[esc]") + " Deselect  " +
-		linebreakStyle.Render("[d]") + " Remove  " +
-		linebreakStyle.Render("[a]") + " Add  " +
-		linebreakStyle.Render("[/]") + " Search  " +
-		linebreakStyle.Render("[tab]") + " Player"
-	if len(m.matches) > 0 {
-		hints += "  " + linebreakStyle.Render("[n/N]") + " Next/Prev match"
+	if m.showHelp {
+		hints := linebreakStyle.Render("[j/k]") + " Navigate  " +
+			linebreakStyle.Render("[home/end]") + " Top/Bottom  " +
+			linebreakStyle.Render("[pgup/pgdn]") + " Page  " +
+			linebreakStyle.Render("[g]") + " Current track  " +
+			linebreakStyle.Render("[enter]") + " Select/Drop  " +
+			linebreakStyle.Render("[esc]") + " Deselect  " +
+			linebreakStyle.Render("[d]") + " Remove  " +
+			linebreakStyle.Render("[a]") + " Add  " +
+			linebreakStyle.Render("[/]") + " Search  " +
+			linebreakStyle.Render("[tab]") + " Player"
+		if len(m.matches) > 0 {
+			hints += "  " + linebreakStyle.Render("[n/N]") + " Next/Prev match"
+		}
+		lines = append(lines, hints)
 	}
-	lines = append(lines, hints)
  
 	return strings.Join(lines, "\n")
 }
